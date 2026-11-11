@@ -4,6 +4,24 @@ import SwiftUI
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         DotfileStore.shared.applyTheme()
+        if let output = ProcessInfo.processInfo.environment["CLITOOL_SCREENSHOT"] {
+            captureWindow(to: output)
+        }
+    }
+
+    /// Screenshot mode, used by scripts/make-screenshot.sh: once the window has drawn,
+    /// renders it (title bar included) to a PNG and exits. The app draws itself, so
+    /// this needs no screen-recording permission.
+    private func captureWindow(to output: String) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            guard let window = NSApp.windows.first(where: { $0.isVisible }),
+                  let view = window.contentView?.superview,
+                  let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { exit(1) }
+            view.cacheDisplay(in: view.bounds, to: bitmap)
+            guard let png = bitmap.representation(using: .png, properties: [:]),
+                  (try? png.write(to: URL(fileURLWithPath: output))) != nil else { exit(1) }
+            exit(0)
+        }
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
