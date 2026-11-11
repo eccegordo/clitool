@@ -190,6 +190,7 @@ struct SnapshotReviewView: View {
                             .frame(width: 22)
                             .foregroundStyle(line.kind.color)
                         Text(line.text.isEmpty ? " " : line.text)
+                            .foregroundStyle(Color(nsColor: store.theme.text))
                         Spacer(minLength: 0)
                     }
                     .font(.system(size: 13, design: .monospaced))
@@ -201,7 +202,7 @@ struct SnapshotReviewView: View {
             .padding(.vertical, 8)
             .textSelection(.enabled)
         }
-        .background(Color(nsColor: .textBackgroundColor))
+        .background(Color(nsColor: store.theme.background))
     }
 }
 

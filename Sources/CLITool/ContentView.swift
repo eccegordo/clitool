@@ -60,6 +60,12 @@ struct ContentView: View {
             .help("Save a snapshot of this file as it is on disk (⌘B)")
             .popover(isPresented: $store.showingSnapshotPopover, arrowEdge: .bottom) { snapshotPopover }
 
+            Button { store.theme = store.theme.toggled } label: {
+                Label(store.theme == .dark ? "Light Theme" : "Dark Theme",
+                      systemImage: store.theme == .dark ? "sun.max" : "moon")
+            }
+            .help("Switch between the light and dark theme (⇧⌘L)")
+
             Button { store.openNewTerminal() } label: {
                 Label("New Terminal", systemImage: "terminal")
             }
@@ -164,7 +170,7 @@ struct EditorPane: View {
             if let snapshot = selectedSnapshot {
                 SnapshotReviewView(snapshot: snapshot)
             } else {
-                CodeEditor(text: $store.text)
+                CodeEditor(text: $store.text, theme: store.theme, isShell: file.syntaxShell != nil)
                     .id(file.path)
             }
             Divider()

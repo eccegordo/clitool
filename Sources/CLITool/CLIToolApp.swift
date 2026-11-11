@@ -2,6 +2,10 @@ import AppKit
 import SwiftUI
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        DotfileStore.shared.applyTheme()
+    }
+
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
@@ -55,6 +59,12 @@ struct CLIToolApp: App {
                     .disabled(store.selectedFile?.syntaxShell == nil)
                 Button("New Terminal Window") { store.openNewTerminal() }
                     .keyboardShortcut("t")
+            }
+            CommandGroup(after: .toolbar) {
+                Button(store.theme == .dark ? "Use Light Theme" : "Use Dark Theme") {
+                    store.theme = store.theme.toggled
+                }
+                .keyboardShortcut("l", modifiers: [.command, .shift])
             }
         }
     }

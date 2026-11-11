@@ -45,6 +45,7 @@ final class DotfileStore: ObservableObject {
         ".ssh/config", ".config/starship.toml",
     ]
     private static let customFilesKey = "customFiles"
+    private static let themeKey = "theme"
 
     @Published private(set) var files: [Dotfile] = []
     @Published var selectedPath: String? {
@@ -60,6 +61,13 @@ final class DotfileStore: ObservableObject {
     @Published var selectedSnapshotID: UUID?
     @Published var status: StatusMessage?
     @Published var confirmingReload = false
+    /// Light or dark look for the whole app; defaults to the system setting on first launch.
+    @Published var theme: EditorTheme {
+        didSet {
+            UserDefaults.standard.set(theme.rawValue, forKey: Self.themeKey)
+            applyTheme()
+        }
+    }
 
     // View state. Kept here rather than in @State, whose macro plugin ships only with
     // full Xcode — this project builds with just the Command Line Tools.
@@ -69,9 +77,17 @@ final class DotfileStore: ObservableObject {
     @Published var confirmingRestore = false
 
     private init() {
+        let systemIsDark = UserDefaults.standard.string(forKey: "AppleInterfaceStyle") == "Dark"
+        theme = UserDefaults.standard.string(forKey: Self.themeKey).flatMap(EditorTheme.init(rawValue:))
+            ?? (systemIsDark ? .dark : .light)
         reloadFileList()
         selectedPath = files.first?.path
         selectionChanged()
+    }
+
+    /// Makes the app's windows match the chosen theme.
+    func applyTheme() {
+        NSApp?.appearance = theme.appearance
     }
 
     // MARK: File list
